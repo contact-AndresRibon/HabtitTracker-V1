@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1976d2;
+            --secondary: #43a047;
+            --success: #ffb300;
+            --danger: #e53935;
+            --warning: #fb8c00;
+            --light: #f5f5f5;
+            --dark: #263238;
+            --gray: #90a4ae;
+            --background: #e3f2fd;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 12px rgba(25, 118, 210, 0.08);
+            --shadow-hover: 0 6px 20px rgba(25, 118, 210, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .app-title i {
+            font-size: 2.5rem;
+            color: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            margin-top: 20px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tabs li {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
+        .nav-tabs li.active {
+            background: var(--success);
+            color: var(--dark);
+            font-weight: bold;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 179, 0, 0.3);
+        }
+
+        .nav-tabs li:hover:not(.active) {
+            background: var(--warning);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #1565c0 100%);
+            color: #fff;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #ffa000 100%);
+            color: var(--dark);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #c62828 100%);
+            color: #fff;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #f57c00 100%);
+            color: #fff;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(25, 118, 210, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--light);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+
+        .points-display {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 2rem;
+            margin: 0 0 24px 0;
+            text-align: center;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            animation: slideDown 0.5s ease;
+        }
+
+        .points-icon {
+            display: inline-block;
+            margin-right: 10px;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 16px 0;
+            color: var(--success);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .habits-grid, .rewards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .habit-item, .reward-item {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border-left: 6px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .habit-item:hover, .reward-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-left-color: var(--secondary);
+        }
+
+        .habit-header, .reward-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .habit-name, .reward-name {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--dark);
+        }
+
+        .habit-points, .reward-points {
+            background: linear-gradient(135deg, var(--success) 0%, var(--warning) 100%);
+            color: var(--dark);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(255, 179, 0, 0.3);
+        }
+
+        .habit-frequency, .habit-completions {
+            font-size: 0.95rem;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .habit-status {
+            margin: 12px 0;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .habit-actions, .reward-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .habit-actions .btn, .reward-actions .btn {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+            font-size: 0.9rem;
+            padding: 10px 16px;
+        }
+
+        .progress-container {
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            height: 12px;
+            margin-top: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--secondary) 0%, var(--success) 100%);
+            border-radius: 8px;
+            height: 100%;
+            transition: width 0.5s ease;
+            box-shadow: 0 2px 4px rgba(67, 160, 71, 0.3);
+        }
+
+        .empty-state {
+            color: var(--gray);
+            padding: 48px 32px;
+            text-align: center;
+            background: var(--light);
+            border-radius: 16px;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            color: var(--warning);
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 32px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content h3 {
+            margin-bottom: 24px;
+            color: var(--primary);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        .reset-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--dark);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            z-index: 2000;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success { background: var(--secondary); }
+        .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--warning); }
+
+        @media (max-width: 768px) {
+            .habits-grid, .rewards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .nav-tabs li {
+                width: 100%;
+                text-align: center;
+            }
+
+            .reset-buttons {
+                flex-direction: column;
+            }
+
+            .habit-actions, .reward-actions {
+                flex-direction: column;
+            }
+
+            .habit-actions .btn, .reward-actions .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .card-title {
+                font-size: 1.4rem;
+            }
+
+            .points-display {
+                font-size: 1.5rem;
+                padding: 20px;
+            }
+
+            .stat-value {
+                font-size: 2.5rem;
+            }
+
+            .modal-content {
+                padding: 24px;
+                max-width: 95vw;
+            }
+
+            .toast {
+                bottom: 16px;
+                right: 16px;
+                left: 16px;
+            }
+        }
+
+        /* Animaciones adicionales */
+        .bounce {
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="app-title">
+                <i class="fas fa-chart-line"></i>
+                <h1>Habit Tracker Pro</h1>
+            </div>
+            
+            <ul class="nav-tabs">
+                <li class="active" data-tab="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </li>
+                <li data-tab="habits">
+                    <i class="fas fa-tasks"></i> Hábitos
+                </li>
+                <li data-tab="rewards">
+                    <i class="fas fa-gift"></i> Recompensas
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Puntos del usuario -->
+        <div class="points-display">
+            <span class="points-icon"><i class="fas fa-coins"></i></span>
+            <span id="user-points">0</span> puntos disponibles
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="tab-content active">
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-chart-bar"></i> Mi Desempeño
+                </h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-percentage" style="font-size: 2rem; opacity: 0.8;"></i>
+                        <div class="stat-label">Cumplimiento Diario</div>
+                        <div class="stat-value" id="daily-completion">0%</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <i class="fas fa-trophy" style="font-size: 2rem; opacity: 0.8;"></i>
+                        <div class="stat-label">Puntos Ganados</div>
+                        <div class="stat-value" id="earned-points">0</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <i class="fas fa-fire" style="font-size: 2rem; opacity: 0.8;"></i>
+                        <div class="stat-label">Racha Actual</div>
+                        <div class="stat-value" id="current-streak">0</div>
+                    </div>
+                </div>
+
+                <div class="reset-buttons">
+                    <button class="btn btn-danger" id="reset-points-btn">
+                        <i class="fas fa-undo"></i> Reiniciar Puntaje
+                    </button>
+                    <button class="btn btn-warning" id="reset-performance-btn">
+                        <i class="fas fa-redo"></i> Reiniciar Desempeño
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-calendar-day"></i> Hábitos de Hoy
+                </h2>
+                <div id="today-habits"></div>
+            </div>
+        </div>
+
+        <!-- Gestión de Hábitos -->
+        <div id="habits" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-plus-circle"></i> Agregar Nuevo Hábito
+                </h2>
+                
+                <form id="add-habit-form">
+                    <div class="form-group">
+                        <label for="habit-name">
+                            <i class="fas fa-tag"></i> Nombre del Hábito
+                        </label>
+                        <input type="text" id="habit-name" class="form-control" placeholder="Ej: Ejercicio 30 min" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="habit-points">
+                            <i class="fas fa-star"></i> Puntos por completar
+                        </label>
+                        <input type="number" id="habit-points" class="form-control" min="1" value="10" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="habit-frequency">
+                            <i class="fas fa-clock"></i> Frecuencia
+                        </label>
+                        <select id="habit-frequency" class="form-control">
+                            <option value="daily">Diario</option>
+                            <option value="weekly">Semanal</option>
+                            <option value="monthly">Mensual</option>
+                            <option value="none">Sin periodicidad</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-plus"></i> Agregar Hábito
+                    </button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-list-check"></i> Mis Hábitos
+                </h2>
+                <div id="habits-list" class="habits-grid"></div>
+            </div>
+        </div>
+
+        <!-- Gestión de Recompensas -->
+        <div id="rewards" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-gift"></i> Agregar Recompensa
+                </h2>
+                
+                <form id="add-reward-form">
+                    <div class="form-group">
+                        <label for="reward-name">
+                            <i class="fas fa-award"></i> Nombre de la Recompensa
+                        </label>
+                        <input type="text" id="reward-name" class="form-control" placeholder="Ej: Ir al cine" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reward-cost">
+                            <i class="fas fa-coins"></i> Costo en puntos
+                        </label>
+                        <input type="number" id="reward-cost" class="form-control" min="1" value="50" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-plus"></i> Agregar Recompensa
+                    </button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-gifts"></i> Recompensas Disponibles
+                </h2>
+                <div id="rewards-list" class="rewards-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar hábito -->
+    <div id="edit-habit-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-edit"></i> Editar Hábito</h3>
+            <form id="edit-habit-form">
+                <input type="hidden" id="edit-habit-id">
+                <div class="form-group">
+                    <label for="edit-habit-name">Nombre</label>
+                    <input type="text" id="edit-habit-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-habit-points">Puntos</label>
+                    <input type="number" id="edit-habit-points" class="form-control" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-habit-frequency">Frecuencia</label>
+                    <select id="edit-habit-frequency" class="form-control">
+                        <option value="daily">Diario</option>
+                        <option value="weekly">Semanal</option>
+                        <option value="monthly">Mensual</option>
+                        <option value="none">Sin periodicidad</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="closeEditHabitModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para editar recompensa -->
+    <div id="edit-reward-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-edit"></i> Editar Recompensa</h3>
+            <form id="edit-reward-form">
+                <input type="hidden" id="edit-reward-id">
+                <div class="form-group">
+                    <label for="edit-reward-name">Nombre</label>
+                    <input type="text" id="edit-reward-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-reward-cost">Costo en puntos</label>
+                    <input type="number" id="edit-reward-cost" class="form-control" min="1" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="closeEditRewardModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Modelo de datos
+        let userData = {
+            points: 100,
+            habits: [],
+            rewards: [],
+            completions: []
+        };
+
+        // Elementos de la interfaz
+        const tabContents = document.querySelectorAll('.tab-content');
+        const tabLinks = document.querySelectorAll('.nav-tabs li');
+        const userPointsElement = document.getElementById('user-points');
+        const habitsList = document.getElementById('habits-list');
+        const rewardsList = document.getElementById('rewards-list');
+        const todayHabits = document.getElementById('today-habits');
+        const addHabitForm = document.getElementById('add-habit-form');
+        const addRewardForm = document.getElementById('add-reward-form');
+        const editHabitModal = document.getElementById('edit-habit-modal');
+        const editHabitForm = document.getElementById('edit-habit-form');
+        const editRewardModal = document.getElementById('edit-reward-modal');
+        const editRewardForm = document.getElementById('edit-reward-form');
+        const toast = document.getElementById('toast');
+
+        // Función para mostrar notificaciones
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'flex';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            setupEventListeners();
+            updateUI();
+            renderHabits();
+            renderRewards();
+            renderTodayHabits();
+            updateDashboard();
+
+            // Botón reiniciar puntaje
+            document.getElementById('reset-points-btn').addEventListener('click', function() {
+                if (confirm('¿Seguro que quieres reiniciar el puntaje?')) {
+                    userData.points = 0;
+                    saveUserData();
+                    updateUI();
+                    updateDashboard();
+                    renderHabits();
+                    renderRewards();
+                    renderTodayHabits();
+                    showToast('Puntaje reiniciado', 'warning');
+                }
+            });
+
+            // Botón reiniciar desempeño
+            document.getElementById('reset-performance-btn').addEventListener('click', function() {
+                if (confirm('¿Seguro que quieres reiniciar el desempeño? Esto borrará todas las completaciones.')) {
+                    userData.completions = [];
+                    userData.lastStreakRewardDate = null;
+                    saveUserData();
+                    updateUI();
+                    updateDashboard();
+                    renderHabits();
+                    renderRewards();
+                    renderTodayHabits();
+                    showToast('Desempeño reiniciado', 'warning');
+                }
+            });
+        });
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Navegación por pestañas
+            tabLinks.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+
+            // Formularios
+            addHabitForm.addEventListener('submit', handleAddHabit);
+            addRewardForm.addEventListener('submit', handleAddReward);
+            editHabitForm.addEventListener('submit', handleEditHabit);
+            editRewardForm.addEventListener('submit', handleEditReward);
+
+            // Cerrar modal al hacer clic fuera
+            editHabitModal.addEventListener('click', (e) => {
+                if (e.target === editHabitModal) closeEditHabitModal();
+            });
+
+            editRewardModal.addEventListener('click', (e) => {
+                if (e.target === editRewardModal) closeEditRewardModal();
+            });
+        }
+
+        // Cambiar de pestaña
+        function switchTab(tabId) {
+            tabContents.forEach(content => content.classList.remove('active'));
+            tabLinks.forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        }
+
+        // Manejar agregar hábito
+        function handleAddHabit(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('habit-name').value;
+            const points = parseInt(document.getElementById('habit-points').value);
+            const frequency = document.getElementById('habit-frequency').value;
+            
+            const newHabit = {
+                id: Date.now(),
+                name,
+                points,
+                frequency,
+                createdAt: new Date().toISOString()
+            };
+            
+            userData.habits.push(newHabit);
+            saveUserData();
+            renderHabits();
+            addHabitForm.reset();
+            
+            showToast(`¡Hábito "${name}" agregado exitosamente!`, 'success');
+            userPointsElement.parentElement.classList.add('bounce');
+            setTimeout(() => userPointsElement.parentElement.classList.remove('bounce'), 500);
+        }
+
+        // Manejar agregar recompensa
+        function handleAddReward(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('reward-name').value;
+            const cost = parseInt(document.getElementById('reward-cost').value);
+            
+            const newReward = {
+                id: Date.now(),
+                name,
+                cost
+            };
+            
+            userData.rewards.push(newReward);
+            saveUserData();
+            renderRewards();
+            addRewardForm.reset();
+            
+            showToast(`¡Recompensa "${name}" agregada!`, 'success');
+        }
+
+        // Manejar editar hábito
+        function handleEditHabit(e) {
+            e.preventDefault();
+            
+            const id = parseInt(document.getElementById('edit-habit-id').value);
+            const name = document.getElementById('edit-habit-name').value;
+            const points = parseInt(document.getElementById('edit-habit-points').value);
+            const frequency = document.getElementById('edit-habit-frequency').value;
+            
+            const habit = userData.habits.find(h => h.id === id);
+            if (habit) {
+                habit.name = name;
+                habit.points = points;
+                habit.frequency = frequency;
+                saveUserData();
+                renderHabits();
+                renderTodayHabits();
+                updateDashboard();
+                showToast('Hábito actualizado', 'success');
+            }
+            closeEditHabitModal();
+        }
+
+        // Manejar editar recompensa
+        function handleEditReward(e) {
+            e.preventDefault();
+            
+            const id = parseInt(document.getElementById('edit-reward-id').value);
+            const name = document.getElementById('edit-reward-name').value;
+            const cost = parseInt(document.getElementById('edit-reward-cost').value);
+            
+            const reward = userData.rewards.find(r => r.id === id);
+            if (reward) {
+                reward.name = name;
+                reward.cost = cost;
+                saveUserData();
+                renderRewards();
+                showToast('Recompensa actualizada', 'success');
+            }
+            closeEditRewardModal();
+        }
+
+        // Completar hábito
+        function completeHabit(habitId) {
+            const habit = userData.habits.find(h => h.id === habitId);
+            if (!habit) return;
+
+            // Registrar completado
+            userData.completions.push({
+                habitId,
+                date: new Date().toISOString()
+            });
+
+            // Sumar puntos con animación
+            const oldPoints = userData.points;
+            userData.points += habit.points;
+
+            saveUserData();
+            updateUI();
+            updateDashboard();
+            renderHabits();
+            renderRewards();
+            renderTodayHabits();
+            
+            showToast(`¡+${habit.points} puntos! 🎉`, 'success');
+            
+            // Animación de puntos
+            animatePointsChange(oldPoints, userData.points);
+        }
+
+        // Animar cambio de puntos
+        function animatePointsChange(from, to) {
+            const duration = 500;
+            const start = Date.now();
+            const diff = to - from;
+
+            function update() {
+                const now = Date.now();
+                const progress = Math.min((now - start) / duration, 1);
+                const current = Math.floor(from + diff * progress);
+                userPointsElement.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    userPointsElement.parentElement.classList.add('bounce');
+                    setTimeout(() => userPointsElement.parentElement.classList.remove('bounce'), 500);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        // Canjear recompensa
+        function redeemReward(rewardId) {
+            const reward = userData.rewards.find(r => r.id === rewardId);
+            if (!reward) return;
+
+            if (userData.points >= reward.cost) {
+                const oldPoints = userData.points;
+                userData.points -= reward.cost;
+                saveUserData();
+                updateUI();
+                animatePointsChange(oldPoints, userData.points);
+                showToast(`¡Felicidades! Has canjeado: ${reward.name} 🎁`, 'success');
+            } else {
+                const posibleNuevoSaldo = userData.points - reward.cost;
+                if (posibleNuevoSaldo >= -50) {
+                    if (confirm(`No tienes suficientes puntos. ¿Quieres tomar un préstamo y quedar en ${posibleNuevoSaldo} puntos (máx. -50)?`)) {
+                        const oldPoints = userData.points;
+                        userData.points = posibleNuevoSaldo;
+                        saveUserData();
+                        updateUI();
+                        animatePointsChange(oldPoints, userData.points);
+                        showToast(`Préstamo tomado para: ${reward.name}. ¡Recuerda pagar!`, 'warning');
+                    }
+                } else {
+                    showToast('No puedes tomar más préstamo. Máximo: -50 puntos', 'error');
+                    userPointsElement.parentElement.classList.add('shake');
+                    setTimeout(() => userPointsElement.parentElement.classList.remove('shake'), 500);
+                }
+            }
+        }
+
+        // Renderizar hábitos
+        function renderHabits() {
+            habitsList.innerHTML = '';
+
+            if (userData.habits.length === 0) {
+                habitsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-tasks"></i>
+                        <h3>No hay hábitos registrados</h3>
+                        <p>Agrega tu primer hábito para comenzar tu viaje</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sortedHabits = [
+                ...userData.habits.filter(h => h.frequency === 'none'),
+                ...userData.habits.filter(h => h.frequency !== 'none')
+            ];
+
+            sortedHabits.forEach(habit => {
+                const completions = userData.completions.filter(c => c.habitId === habit.id).length;
+
+                const habitElement = document.createElement('div');
+                habitElement.className = 'habit-item';
+
+                if (habit.frequency === 'none') {
+                    habitElement.innerHTML = `
+                        <div class="habit-header">
+                            <div class="habit-name"><i class="fas fa-check-circle"></i> ${habit.name}</div>
+                            <div class="habit-points">${habit.points} pts</div>
+                        </div>
+                        <div class="habit-frequency"><i class="fas fa-infinity"></i> ${getFrequencyText(habit.frequency)}</div>
+                        <div class="habit-completions"><i class="fas fa-star"></i> Completado: ${completions} veces</div>
+                        <div class="habit-actions">
+                            <button class="btn btn-success" onclick="completeHabit(${habit.id})">
+                                <i class="fas fa-plus"></i> Sumar Puntos
+                            </button>
+                            <button class="btn btn-warning" onclick="showEditHabit(${habit.id})">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteHabit(${habit.id})">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    const progress = Math.min(completions * 10, 100);
+                    habitElement.innerHTML = `
+                        <div class="habit-header">
+                            <div class="habit-name"><i class="fas fa-bullseye"></i> ${habit.name}</div>
+                            <div class="habit-points">${habit.points} pts</div>
+                        </div>
+                        <div class="habit-frequency"><i class="fas fa-calendar-alt"></i> ${getFrequencyText(habit.frequency)}</div>
+                        <div class="habit-completions"><i class="fas fa-chart-line"></i> Completado: ${completions} veces</div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="habit-actions">
+                            <button class="btn btn-success" onclick="completeHabit(${habit.id})">
+                                <i class="fas fa-check"></i> Completar
+                            </button>
+                            <button class="btn btn-warning" onclick="showEditHabit(${habit.id})">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteHabit(${habit.id})">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    `;
+                }
+
+                habitsList.appendChild(habitElement);
+            });
+        }
+
+        // Renderizar recompensas
+        function renderRewards() {
+            rewardsList.innerHTML = '';
+            
+            if (userData.rewards.length === 0) {
+                rewardsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-gift"></i>
+                        <h3>No hay recompensas disponibles</h3>
+                        <p>Agrega recompensas para canjear con tus puntos ganados</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            userData.rewards.forEach(reward => {
+                const canAfford = userData.points >= reward.cost;
+                const rewardElement = document.createElement('div');
+                rewardElement.className = 'reward-item';
+                rewardElement.style.borderLeftColor = canAfford ? 'var(--success)' : 'var(--danger)';
+                
+                rewardElement.innerHTML = `
+                    <div class="reward-header">
+                        <div class="reward-name"><i class="fas fa-award"></i> ${reward.name}</div>
+                        <div class="reward-points">${reward.cost} pts</div>
+                    </div>
+                    <p style="color: ${canAfford ? 'var(--secondary)' : 'var(--danger)'}; font-weight: 600; margin: 8px 0;">
+                        <i class="fas fa-${canAfford ? 'check-circle' : 'lock'}"></i> 
+                        ${canAfford ? '¡Disponible para canjear!' : 'Necesitas más puntos'}
+                    </p>
+                    <div class="habit-actions">
+                        <button class="btn btn-primary" onclick="redeemReward(${reward.id})">
+                            <i class="fas fa-shopping-cart"></i> Canjear
+                        </button>
+                        <button class="btn btn-warning" onclick="showEditReward(${reward.id})">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteReward(${reward.id})">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                `;
+                
+                rewardsList.appendChild(rewardElement);
+            });
+        }
+
+        // Renderizar hábitos de hoy
+        function renderTodayHabits() {
+            todayHabits.innerHTML = '';
+
+            const dailyHabits = userData.habits.filter(h => h.frequency === 'daily');
+
+            if (dailyHabits.length === 0) {
+                todayHabits.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-day"></i>
+                        <h3>No hay hábitos diarios para hoy</h3>
+                        <p>Agrega hábitos diarios para verlos aquí</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const today = new Date().toDateString();
+            const todayCompletions = userData.completions.filter(c => {
+                const completionDate = new Date(c.date).toDateString();
+                return completionDate === today;
+            }).map(c => c.habitId);
+
+            dailyHabits.forEach(habit => {
+                const isCompleted = todayCompletions.includes(habit.id);
+
+                const habitElement = document.createElement('div');
+                habitElement.className = 'habit-item';
+                habitElement.style.borderLeftColor = isCompleted ? 'var(--success)' : 'var(--warning)';
+                
+                habitElement.innerHTML = `
+                    <div class="habit-header">
+                        <div class="habit-name">${habit.name}</div>
+                        <div class="habit-points">${habit.points} pts</div>
+                    </div>
+                    <div class="habit-frequency"><i class="fas fa-sun"></i> ${getFrequencyText(habit.frequency)}</div>
+                    <div class="habit-status">${isCompleted ? 
+                        '<span style="color: var(--secondary);"><i class="fas fa-check-circle"></i> ¡Completado hoy!</span>' : 
+                        '<span style="color: var(--warning);"><i class="fas fa-clock"></i> Pendiente</span>'}</div>
+                    ${!isCompleted ? `
+                    <button class="btn btn-success" onclick="completeHabit(${habit.id})" style="width: 100%; margin-top: 8px;">
+                        <i class="fas fa-check"></i> Marcar como Completado
+                    </button>
+                    ` : '<div style="text-align:center; margin-top:8px; color: var(--success); font-size: 2rem;"><i class="fas fa-trophy"></i></div>'}
+                `;
+                
+                todayHabits.appendChild(habitElement);
+            });
+        }
+
+        // Actualizar dashboard
+        function updateDashboard() {
+            const earnedPoints = userData.completions.reduce((total, completion) => {
+                const habit = userData.habits.find(h => h.id === completion.habitId);
+                return total + (habit ? habit.points : 0);
+            }, 0);
+
+            document.getElementById('earned-points').textContent = earnedPoints;
+
+            // Calcular racha actual
+            let currentStreak = 0;
+            let streakDays = 0;
+            const today = new Date();
+
+            for (let i = 0; i < 30; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dateStr = date.toDateString();
+
+                const dailyHabits = userData.habits.filter(h => h.frequency === 'daily');
+                if (dailyHabits.length === 0) break;
+
+                const completadosHoyIds = userData.completions
+                    .filter(c => {
+                        const completionDate = new Date(c.date).toDateString();
+                        return completionDate === dateStr && dailyHabits.some(h => h.id === c.habitId);
+                    })
+                    .map(c => c.habitId);
+
+                const completadosUnicos = [...new Set(completadosHoyIds)];
+                if (completadosUnicos.length === dailyHabits.length) {
+                    streakDays++;
+                } else {
+                    break;
+                }
+            }
+            currentStreak = streakDays;
+            document.getElementById('current-streak').textContent = currentStreak;
+
+            // Recompensa por racha de 7 días
+            if (currentStreak === 7 && !userData.lastStreakRewardDate) {
+                userData.points += 100;
+                userData.lastStreakRewardDate = today.toDateString();
+                saveUserData();
+                updateUI();
+                showToast('¡INCREÍBLE! Racha de 7 días: +100 puntos extra 🔥', 'success');
+            }
+            if (currentStreak < 7) {
+                userData.lastStreakRewardDate = null;
+                saveUserData();
+            }
+
+            // Calcular porcentaje de completación diaria
+            const todayStr = new Date().toDateString();
+            const dailyHabits = userData.habits.filter(h => h.frequency === 'daily');
+            const completedTodayIds = userData.completions.filter(c => {
+                const completionDate = new Date(c.date).toDateString();
+                return completionDate === todayStr && dailyHabits.some(h => h.id === c.habitId);
+            }).map(c => c.habitId);
+            const completedTodayUnique = [...new Set(completedTodayIds)].length;
+            const percent = dailyHabits.length > 0 ? Math.round((completedTodayUnique / dailyHabits.length) * 100) : 0;
+            document.getElementById('daily-completion').textContent = percent + '%';
+        }
+
+        // Eliminar hábito
+        function deleteHabit(habitId) {
+            if (confirm('¿Estás seguro de que quieres eliminar este hábito?')) {
+                userData.habits = userData.habits.filter(h => h.id !== habitId);
+                userData.completions = userData.completions.filter(c => c.habitId !== habitId);
+                saveUserData();
+                renderHabits();
+                renderTodayHabits();
+                updateDashboard();
+                showToast('Hábito eliminado', 'warning');
+            }
+        }
+
+        // Eliminar recompensa
+        function deleteReward(rewardId) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta recompensa?')) {
+                userData.rewards = userData.rewards.filter(r => r.id !== rewardId);
+                saveUserData();
+                renderRewards();
+                showToast('Recompensa eliminada', 'warning');
+            }
+        }
+
+        // Mostrar modal de edición de hábito
+        function showEditHabit(habitId) {
+            const habit = userData.habits.find(h => h.id === habitId);
+            if (!habit) return;
+            document.getElementById('edit-habit-id').value = habit.id;
+            document.getElementById('edit-habit-name').value = habit.name;
+            document.getElementById('edit-habit-points').value = habit.points;
+            document.getElementById('edit-habit-frequency').value = habit.frequency;
+            editHabitModal.style.display = 'flex';
+        }
+
+        function closeEditHabitModal() {
+            editHabitModal.style.display = 'none';
+        }
+
+        // Mostrar modal de edición de recompensa
+        function showEditReward(rewardId) {
+            const reward = userData.rewards.find(r => r.id === rewardId);
+            if (!reward) return;
+            document.getElementById('edit-reward-id').value = reward.id;
+            document.getElementById('edit-reward-name').value = reward.name;
+            document.getElementById('edit-reward-cost').value = reward.cost;
+            editRewardModal.style.display = 'flex';
+        }
+
+        function closeEditRewardModal() {
+            editRewardModal.style.display = 'none';
+        }
+
+        // Obtener texto de frecuencia
+        function getFrequencyText(frequency) {
+            const frequencies = {
+                'daily': 'Diario',
+                'weekly': 'Semanal',
+                'monthly': 'Mensual',
+                'none': 'Sin periodicidad'
+            };
+            return frequencies[frequency] || frequency;
+        }
+
+        // Actualizar UI
+        function updateUI() {
+            userPointsElement.textContent = userData.points;
+        }
+
+        // Cargar datos del usuario
+        function loadUserData() {
+            const savedData = localStorage.getItem('habitTrackerData');
+            if (savedData) {
+                userData = JSON.parse(savedData);
+            } else {
+                userData = {
+                    points: 100,
+                    habits: [
+                        { id: 1, name: "Ejercicio 30 min", points: 15, frequency: "daily", createdAt: new Date().toISOString() },
+                        { id: 2, name: "Leer 20 páginas", points: 10, frequency: "daily", createdAt: new Date().toISOString() },
+                        { id: 3, name: "Meditar 10 min", points: 5, frequency: "daily", createdAt: new Date().toISOString() }
+                    ],
+                    rewards: [
+                        { id: 1, name: "Ver una película", cost: 50 },
+                        { id: 2, name: "Comida especial", cost: 80 },
+                        { id: 3, name: "Compra online", cost: 150 }
+                    ],
+                    completions: []
+                };
+                saveUserData();
+            }
+        }
+
+        // Guardar datos del usuario
+        function saveUserData() {
+            localStorage.setItem('habitTrackerData', JSON.stringify(userData));
+        }
+    </script>
+</body>
+</html>
